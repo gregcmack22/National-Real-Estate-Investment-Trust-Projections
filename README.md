@@ -2,4 +2,4 @@
 
 ## Purpose
 Six month, 1 year, and 2 year projection of Real Estate Investment Trusts across the United States by county level per respective markets 
-![Figure 1](C:/Users/Greg Mack/Documents/REIT.png)
+
