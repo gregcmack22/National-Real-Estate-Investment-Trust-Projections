@@ -1,0 +1,37 @@
+library(psych)
+library(Metrics)
+Remove = Class("StoreName", "Owner")
+Data2 <- Data1(,!(names(Data1)%in% Remove)]
+Set.seed(100)
+Train_index <- sample(rownames(Data2), dim(Data2)[100]*0.6)
+Train.Data2 <- Data2[Train,]
+Test_index <- sample(rownames(Data2), dim(Data2)[100]*0.4)
+Test.Data2 <- Data2[Test,]
+
+#creating model by applying prcomp function to independents only
+pc.fit <0 prcomp(~Market_In + Tr_Stocks + Apts + Cell_Twrs + Med_Fac 
+  + Htls + Data_Ctrs + Offs + Ret + Whs, data = Train.Data2, scale = TRUE)
+
+#show PCs
+summary(pc.fit)
+screenplot(pc.fit, type = 'l', main = "Screenplot for Data2Features")
+
+#applying PC model to transform test data
+Transform_test.data2 <- predict(pc.fit, Test.Data2)
+
+#Turining to dataframe with first 7 PCs selected as new independents
+Trans_test.data2 <- as.data.frame(predict(pc.fit, Test.Data2)[,1:7])
+
+#Add Y variable to training set
+New_Train <- as.data.frame(cbind(Train.Data2$SqFt, pc.fit$X[,1:7]))
+colnames(new_train)[1] <- "SqFt"
+
+#create new model
+pcr_lm <- lm(SqFt ~., data = new_train
+summary(pcr_lm)
+
+# generate predictions
+pcr_predictions <- predict(pcr_lm, Trans_test.data2)
+
+# find accuracy
+rmse(actual = Test.Data2$SqFt, predicted = as.numeric(pcr_predictions)
