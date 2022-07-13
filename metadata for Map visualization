@@ -1,0 +1,41 @@
+#-----------------metadata for SqFt per city (in 6months) map visualization------------------------------------------------- 
+select [State], City, Longitude, Latitude,  sum(SquareFootage) over (Partition by City) as SqFt from REIT
+
+#-----------------metadata for SqFt per city (in 6 months) map visualization-------------------------------------------------- 
+with crrnt as 
+(select [State], City, Longitude, Latitude,  sum(SquareFootage) over (Partition by City) as SqFt from REIT),
+new as
+(select [State], City, Longitude, Latitude, sum(SquareFootage) over (Partition by City) as SqFt
+from KnownDevelopments2
+where ExpectedToOpen <= '2022-12-24')
+select [State], City, Longitude, Latitude, SqFt
+from crrnt
+union
+select [State], City, Longitude, Latitude, SqFt
+from New
+
+#-----------------metadata for SqFt per city (in 1 year) map visualization-------------------------------------------------- 
+with crrnt as 
+(select [State], City, Longitude, Latitude,  sum(SquareFootage) over (Partition by City) as SqFt from REIT),
+new as
+(select [State], City, Longitude, Latitude, sum(SquareFootage) over (Partition by City) as SqFt
+from KnownDevelopments2
+where ExpectedToOpen <= '2023-16-24')
+select [State], City, Longitude, Latitude, SqFt
+from crrnt
+union
+select [State], City, Longitude, Latitude, SqFt
+from New
+
+#-----------------metadata for SqFt per city (in 2 years) map visualization-------------------------------------------------- 
+with crrnt as 
+(select [State], City, Longitude, Latitude,  sum(SquareFootage) over (Partition by City) as SqFt from REIT),
+new as
+(select [State], City, Longitude, Latitude, sum(SquareFootage) over (Partition by City) as SqFt
+from KnownDevelopments2
+where ExpectedToOpen <= '2023-16-24')
+select [State], City, Longitude, Latitude, SqFt
+from crrnt
+union
+select [State], City, Longitude, Latitude, SqFt
+from New
