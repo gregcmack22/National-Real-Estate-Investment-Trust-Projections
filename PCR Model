@@ -9,7 +9,7 @@ Test_index <- sample(rownames(Data2), dim(Data2)[100]*0.4)
 Test.Data2 <- Data2[Test,]
 
 #creating model by applying prcomp function to independents only
-pc.fit <0 prcomp(~Market_In + Tr_Stocks + Apts + Cell_Twrs + Med_Fac 
+pc.fit <- prcomp(~Market_In + Tr_Stocks + Apts + Cell_Twrs + Med_Fac 
   + Htls + Data_Ctrs + Offs + Ret + Whs, data = Train.Data2, scale = TRUE)
 
 #show PCs
@@ -27,7 +27,7 @@ New_Train <- as.data.frame(cbind(Train.Data2$SqFt, pc.fit$X[,1:7]))
 colnames(new_train)[1] <- "SqFt"
 
 #create new model
-pcr_lm <- lm(SqFt ~., data = new_train
+pcr_lm <- lm(SqFt ~., data = new_train)
 summary(pcr_lm)
 
 # generate predictions
@@ -35,3 +35,7 @@ pcr_predictions <- predict(pcr_lm, Trans_test.data2)
 
 # find accuracy
 rmse(actual = Test.Data2$SqFt, predicted = as.numeric(pcr_predictions)
+
+#saving model as RDS files
+saveRDS(pc.fit, "pc_fit.rds")
+saveRDS(pcr_lm, "pcr_model.rds")
