@@ -1,0 +1,47 @@
+install.packages("tidyverse")
+library(tidyverse)
+
+REIT <- read.csv("C:\\Users\\Greg Mack\\Desktop\\Data Science Development Project\\CurrentMap.csv", header = TRUE")
+
+
+
+#-----------------------------Following code is also applied to each projection (6months, 1 year, 2 years)---------------------------------------------------
+# calling list of US counties with longitudes and latitudes
+us_counties <- map_data("county")
+map <- ggplot(data = us_counties,
+  mapping = aes(x = long, y = lay, group = group, fill = subregion)
+)
+
+# calling US map + changing projection and aesthetics of map
+map + geom_polygon(color = "gray90", size = 0.1) +
+  coord_map(projection = "albers", lat0 = 39, lat1 = 45) +
+  guides(fill = FALSE) +
+  scale_fill_gradient(low = "FFFFFF", high = "#FF0000", limites = c(0, NA)) +
+  theme(axis.line = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title = element_blank(),
+        panel.background = element_blank(),
+        panel.border = element_blank(),
+        panel.grid = element+blank()
+ 
+ # merging county data with city SqFt data to give SqFt by county 
+REIT_country <- REIT %>%
+  filter(SqFt >=0) %>%
+  mutate(City = tolower(City)) %>%
+  group_by(City) %>%
+  summarize(SqFt_avg = mean(SqFt, na.rm = TRUE),
+            SqFt_median = median(SqFt, na.rm = TRUE))
+ 
+ # overlaying county level SqFt data onto US map 
+us_counties %>%
+  left_join(REIT_county, by - c("subregion" = "city")) %>%
+  ggplot(aes(x = long, y = lat, group = group, fill = SqFt_avg)) +
+  scale_fill_continuous(type = "viridis") + 
+  theme(legend.position = "bottom",
+        axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title = element_blank(),
+        panel.background = element_blank(),
+        panel.border = element_blank(),
+        panel.grid = element+blank()
