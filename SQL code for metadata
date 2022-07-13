@@ -1,0 +1,251 @@
+#Deliverables:
+#CSV files: 
+  #Current Market of realestate Investment Trust in sqft by city
+  #Market of realestate Investment Trust in sqft by city in 6 months
+  #Market of realestate Investment Trust in sqft by city in 1 year 
+  #Market of realestate Investment Trust in sqft by city in 2 years months
+  
+  #Current Market of realestate Investment Trust in sqft by company
+  #Market of realestate Investment Trust in sqft by company in 6 months
+  #Market of realestate Investment Trust in sqft by company in 1 year 
+  #Market of realestate Investment Trust in sqft by company in 2 years months
+  
+#Excel Workbook - Sheets:
+  #Current Market of realestate Investment Trust in sqft by city
+  #Market of realestate Investment Trust in sqft by city in 6 months with % change
+  #Market of realestate Investment Trust in sqft by city in 1 year with % change
+  #Market of realestate Investment Trust in sqft by city in 2 years months with % change 
+  
+
+  
+  #-------------------------------SqFt per City (Current)----------------------------------------
+  
+with [current] as
+(select distinct r2.[State] as St, r.City as Cty,  sum(r.SquareFootage) over (Partition by r.City) as SqFt from REIT as r
+inner join REIT as r2 on r.City = r2.City and r.SquareFootage = r2.SquareFootage)
+select St, Cty, SqFt from [current]
+order by SqFt desc
+
+  #------------------------------- SqFt per City (in 6 months)-----------------------------
+  
+with [current] as
+(select St, Cty, SqFt from
+(select distinct r2.[State] as St, r.City as Cty, sum(r.SquareFootage) over (Partition by r.City) as SqFt from REIT as r
+inner join REIT as r2 on r.City = r2.City and r.SquareFootage = r2.SquareFootage) as curSqFt),
+new as
+(select St, Cty, SqFt from
+(select distinct k2.[State] as St, k.City as Cty, sum(k.SquareFootage) over (Partition by k.City) as SqFt 
+from KnownDevelopments2 as k
+inner join KnownDevelopments2 as k2 on k.City = k2.City and k.SquareFootage = k2.SquareFootage
+where k.ExpectedToOpen <= '2022-12-24') as new_sqft),
+new_curr as
+(select St, Cty, SqFt from [current]
+union
+select St, Cty, SqFt from new)
+select St, Cty, sum(SqFt) as SqrFt from new_curr
+group by St, Cty
+order by SqrFt desc
+
+  #------------------------------- SqFt per City (in 1 year)-----------------------------
+  
+with [current] as
+(select St, Cty, SqFt from
+(select distinct r2.[State] as St, r.City as Cty, sum(r.SquareFootage) over (Partition by r.City) as SqFt from REIT as r
+inner join REIT as r2 on r.City = r2.City and r.SquareFootage = r2.SquareFootage) as curSqFt),
+new as
+(select St, Cty, SqFt from
+(select distinct k2.[State] as St, k.City as Cty, sum(k.SquareFootage) over (Partition by k.City) as SqFt 
+from KnownDevelopments2 as k
+inner join KnownDevelopments2 as k2 on k.City = k2.City and k.SquareFootage = k2.SquareFootage
+where k.ExpectedToOpen <= '2023-16-24') as new_sqft),
+new_curr as
+(select St, Cty, SqFt from [current]
+union
+select St, Cty, SqFt from new)
+select St, Cty, sum(SqFt) as SqrFt from new_curr
+group by St, Cty
+order by SqrFt desc
+
+  #------------------------------- SqFt per City (in 2 years)-----------------------------
+  
+with [current] as
+(select St, Cty, SqFt from
+(select distinct r2.[State] as St, r.City as Cty, sum(r.SquareFootage) over (Partition by r.City) as SqFt from REIT as r
+inner join REIT as r2 on r.City = r2.City and r.SquareFootage = r2.SquareFootage) as curSqFt),
+new as
+(select St, Cty, SqFt from
+(select distinct k2.[State] as St, k.City as Cty, sum(k.SquareFootage) over (Partition by k.City) as SqFt 
+from KnownDevelopments2 as k
+inner join KnownDevelopments2 as k2 on k.City = k2.City and k.SquareFootage = k2.SquareFootage
+where k.ExpectedToOpen <= '2023-16-24') as new_sqft),
+new_curr as
+(select St, Cty, SqFt from [current]
+union
+select St, Cty, SqFt from new)
+select St, Cty, sum(SqFt) as SqrFt from new_curr
+group by St, Cty
+order by SqrFt desc
+
+
+
+  #-------------------------------Current SqFt per Company----------------------------------------
+  
+select StoreName, sum(SquareFootage) over (Partition by StoreName) as SqFt
+from REIT
+
+
+
+  #-------------------------------SqFt per Company (in 6 months)-----------------------------
+  
+  with [current] as
+(select StoreName, sum(SquareFootage) over (Partition by StoreName) as SqFt from REIT), 
+new as
+(select StoreName, SqFt from
+(select StoreName, ExpectedToOpen, sum(SquareFootage) over (Partition by StoreName) as SqFt
+from KnownDevelopments2) as development_SqFt 
+where ExpectedToOpen <= '2022-12-24'),
+new_curr as
+(select StoreName, SqFt from [current]
+union
+select StoreName, SqFt from new)
+select StoreName, sum(SqFt) as SqrFt from new_curr
+group by StoreName
+order by SqrFt desc
+
+  #-------------------------------SqFt per Company (in 1 year)-----------------------------
+  
+  with [current] as
+(select StoreName, sum(SquareFootage) over (Partition by StoreName) as SqFt from REIT), 
+new as
+(select StoreName, SqFt from
+(select StoreName, ExpectedToOpen, sum(SquareFootage) over (Partition by StoreName) as SqFt
+from KnownDevelopments2) as development_SqFt 
+where ExpectedToOpen <= '2023-6-24'),
+new_curr as
+(select StoreName, SqFt from [current]
+union
+select StoreName, SqFt from new)
+select StoreName, sum(SqFt) as SqrFt from new_curr
+group by StoreName
+order by SqrFt desc
+
+  #-------------------------------SqFt per Company (in 2 years)-----------------------------
+  
+  with [current] as
+(select StoreName, sum(SquareFootage) over (Partition by StoreName) as SqFt from REIT), 
+new as
+(select StoreName, SqFt from
+(select StoreName, ExpectedToOpen, sum(SquareFootage) over (Partition by StoreName) as SqFt
+from KnownDevelopments2) as development_SqFt 
+where ExpectedToOpen <= '2024-6-24'),
+new_curr as
+(select StoreName, SqFt from [current]
+union
+select StoreName, SqFt from new)
+select StoreName, sum(SqFt) as SqrFt from new_curr
+group by StoreName
+order by SqrFt desc
+
+
+  #-------------------------------SqFt per City with % change (in 6 months)-----------------------------
+
+create view view_c as
+with [current] as
+(select distinct r2.[State] as St, r.City as Cty,  sum(r.SquareFootage) over (Partition by r.City) as SqFt 
+from REIT as r
+inner join REIT as r2 on r.City = r2.City and r.SquareFootage = r2.SquareFootage)
+select St, Cty, SqFt from [current]
+#-----------------------------------------------------------------
+create view v_c as 
+with [current] as
+(select St, Cty, SqFt from
+(select distinct r2.[State] as St, r.City as Cty, sum(r.SquareFootage) over (Partition by r.City) as SqFt from REIT as r
+inner join REIT as r2 on r.City = r2.City and r.SquareFootage = r2.SquareFootage) as curSqFt),
+new as
+(select St, Cty, SqFt from
+(select distinct k2.[State] as St, k.City as Cty, sum(k.SquareFootage) over (Partition by k.City) as SqFt 
+from KnownDevelopments2 as k
+inner join KnownDevelopments2 as k2 on k.City = k2.City and k.SquareFootage = k2.SquareFootage
+where k.ExpectedToOpen <= '2022-12-24') as new_sqft),
+new_curr as
+(select St, Cty, SqFt from [current]
+union
+select St, Cty, SqFt from new)
+select St, Cty, sum(SqFt) as SqrFt from new_curr
+group by St, Cty
+#----------------------------------------------------------------------
+
+select v.St, v.Cty, c.SqFt, v.SqrFt as sixmnth_sqft, (v.SqrFt-c.SqFt)/c.SqFt*100 
+as pct_change
+from v_c as v
+inner join view_c as c on c.St = v.St and c.Cty = v.Cty
+order by pct_change desc
+
+
+ #-------------------------------SqFt per City with % change (in 1 year)-----------------------------
+
+create view view_c as
+with [current] as
+(select distinct r2.[State] as St, r.City as Cty,  sum(r.SquareFootage) over (Partition by r.City) as SqFt 
+from REIT as r
+inner join REIT as r2 on r.City = r2.City and r.SquareFootage = r2.SquareFootage)
+select St, Cty, SqFt from [current]
+#-----------------------------------------------------------------
+create view v_c as 
+with [current] as
+(select St, Cty, SqFt from
+(select distinct r2.[State] as St, r.City as Cty, sum(r.SquareFootage) over (Partition by r.City) as SqFt from REIT as r
+inner join REIT as r2 on r.City = r2.City and r.SquareFootage = r2.SquareFootage) as curSqFt),
+new as
+(select St, Cty, SqFt from
+(select distinct k2.[State] as St, k.City as Cty, sum(k.SquareFootage) over (Partition by k.City) as SqFt 
+from KnownDevelopments2 as k
+inner join KnownDevelopments2 as k2 on k.City = k2.City and k.SquareFootage = k2.SquareFootage
+where k.ExpectedToOpen <= '2023-6-24') as new_sqft),
+new_curr as
+(select St, Cty, SqFt from [current]
+union
+select St, Cty, SqFt from new)
+select St, Cty, sum(SqFt) as SqrFt from new_curr
+group by St, Cty
+#----------------------------------------------------------------------
+
+select v.St, v.Cty, c.SqFt, v.SqrFt as 1_yr_sqft, (v.SqrFt-c.SqFt)/c.SqFt*100 
+as pct_change
+from v_c as v
+inner join view_c as c on c.St = v.St and c.Cty = v.Cty
+order by pct_change desc
+
+ #-------------------------------SqFt per City with % change (in 2 years)-----------------------------
+
+create view view_c as
+with [current] as
+(select distinct r2.[State] as St, r.City as Cty,  sum(r.SquareFootage) over (Partition by r.City) as SqFt 
+from REIT as r
+inner join REIT as r2 on r.City = r2.City and r.SquareFootage = r2.SquareFootage)
+select St, Cty, SqFt from [current]
+#-----------------------------------------------------------------
+create view v_c as 
+with [current] as
+(select St, Cty, SqFt from
+(select distinct r2.[State] as St, r.City as Cty, sum(r.SquareFootage) over (Partition by r.City) as SqFt from REIT as r
+inner join REIT as r2 on r.City = r2.City and r.SquareFootage = r2.SquareFootage) as curSqFt),
+new as
+(select St, Cty, SqFt from
+(select distinct k2.[State] as St, k.City as Cty, sum(k.SquareFootage) over (Partition by k.City) as SqFt 
+from KnownDevelopments2 as k
+inner join KnownDevelopments2 as k2 on k.City = k2.City and k.SquareFootage = k2.SquareFootage
+where k.ExpectedToOpen <= '2024-6-24') as new_sqft),
+new_curr as
+(select St, Cty, SqFt from [current]
+union
+select St, Cty, SqFt from new)
+select St, Cty, sum(SqFt) as SqrFt from new_curr
+group by St, Cty
+#----------------------------------------------------------------------
+
+select v.St, v.Cty, c.SqFt, v.SqrFt as 2_yr_sqft, (v.SqrFt-c.SqFt)/c.SqFt*100 
+as pct_change
+from v_c as v
+inner join view_c as c on c.St = v.St and c.Cty = v.Cty
+order by pct_change desc
