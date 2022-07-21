@@ -33,6 +33,48 @@ with [current] as
 (select distinct r2.[State] as St, r.City as Cty, sum(r.SquareFootage) over (Partition by r.City) as SqFt from REIT as r
 inner join REIT as r2 on r.City = r2.City and r.SquareFootage = r2.SquareFootage) as curSqFt),
 new as
+
+#-----------------metadata for SqFt per city (in 6months) map visualization------------------------------------------------- 
+select [State], City, Longitude, Latitude,  sum(SquareFootage) over (Partition by City) as SqFt from REIT
+
+#-----------------metadata for SqFt per city (in 6 months) map visualization-------------------------------------------------- 
+with crrnt as 
+(select [State], City, Longitude, Latitude,  sum(SquareFootage) over (Partition by City) as SqFt from REIT),
+new as
+(select [State], City, Longitude, Latitude, sum(SquareFootage) over (Partition by City) as SqFt
+from KnownDevelopments2
+where ExpectedToOpen <= '2022-12-24')
+select [State], City, Longitude, Latitude, SqFt
+from crrnt
+union
+select [State], City, Longitude, Latitude, SqFt
+from New
+
+#-----------------metadata for SqFt per city (in 1 year) map visualization-------------------------------------------------- 
+with crrnt as 
+(select [State], City, Longitude, Latitude,  sum(SquareFootage) over (Partition by City) as SqFt from REIT),
+new as
+(select [State], City, Longitude, Latitude, sum(SquareFootage) over (Partition by City) as SqFt
+from KnownDevelopments2
+where ExpectedToOpen <= '2023-16-24')
+select [State], City, Longitude, Latitude, SqFt
+from crrnt
+union
+select [State], City, Longitude, Latitude, SqFt
+from New
+
+#-----------------metadata for SqFt per city (in 2 years) map visualization-------------------------------------------------- 
+with crrnt as 
+(select [State], City, Longitude, Latitude,  sum(SquareFootage) over (Partition by City) as SqFt from REIT),
+new as
+(select [State], City, Longitude, Latitude, sum(SquareFootage) over (Partition by City) as SqFt
+from KnownDevelopments2
+where ExpectedToOpen <= '2023-16-24')
+select [State], City, Longitude, Latitude, SqFt
+from crrnt
+union
+select [State], City, Longitude, Latitude, SqFt
+from New
 (select St, Cty, SqFt from
 (select distinct k2.[State] as St, k.City as Cty, sum(k.SquareFootage) over (Partition by k.City) as SqFt 
 from KnownDevelopments2 as k
