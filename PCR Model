@@ -39,3 +39,20 @@ rmse(actual = Test.Data2$SqFt, predicted = as.numeric(pcr_predictions)
 #saving model as RDS files
 saveRDS(pc.fit, "pc_fit.rds")
 saveRDS(pcr_lm, "pcr_model.rds")
+
+
+Model_predict <- function(x) {
+  if (sum(is.na(x)) > 0) {
+    complete.cases(x)
+  }
+  Remove = class("StoreName", "Owner")
+  Data = X[,!(names(X)%in% Remove)]
+  pcfit <- readRDS("pcfit.rds")
+  New_Data <- as.data.frame(predict(pc.fit,test)[,1:7])
+  pcr_model <- readRDS("model.rds")
+  pcr_predictions <- predict(pcr_model, New_Data)
+  
+  return(pcr_predictions)
+  }
+  
+  saveRDS(Model_predict, "pcrmodel.rds")
